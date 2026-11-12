@@ -1,0 +1,28 @@
+services:
+  main:
+    build:
+      context: .
+    image: fxtiktok:local
+    restart: unless-stopped
+    command: ["bun", "run", "src/index.ts"]
+    environment:
+      PORT: "3000"
+      OFF_LOAD: "${OFF_LOAD:-}"
+      METRICS_ENABLED: "${METRICS_ENABLED:-false}"
+      REDIS_ENABLED: "${REDIS_ENABLED:-false}"
+      REDIS_URL: "${REDIS_URL:-redis://redis:6379}"
+    expose:
+      - "3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "--eval",
+          "const port = process.env.PORT || 3000; const res = await fetch('http://127.0.0.1:' + port + '/favicon.ico'); process.exit(res.status === 204 ? 0 : 1)"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
